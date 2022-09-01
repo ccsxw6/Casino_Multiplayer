@@ -57,7 +57,6 @@ let io = socket(server, {cors: { origin: '*'}})
 
 
 //Round class
-
 class gameRound {
     constructor(players) {
       this.deck = new cardsLogic.deck();
@@ -70,22 +69,16 @@ class gameRound {
 //Socket set up
 
 //Creates a game round on startup
-
 let currentGameRound = new gameRound([])
-
-
 
 //Function that checks if all players in the player array are done drawing cards
 function allStandOrBust(){
-
-    let everyPlayerStandOrBust = currentGameRound.players.every((player) => 
-    {
+    let everyPlayerStandOrBust = currentGameRound.players.every((player) => {
        return player.bust || player.stand
     })
-
     return everyPlayerStandOrBust
-
 }
+
 //If all players are done drawing cards, causes the dealer to perform turns until he hits 17 or busts
 function runDealer(){
     if(allStandOrBust()){
@@ -96,7 +89,6 @@ function runDealer(){
 //For each player compares dealer's score to player score
 //For each player clears their bet and awards to their bank the correct amount of money
 currentGameRound.players.forEach(player => {
-
     if(player.score === 21){
         player.bank = player.bank + 1.5*(player.currentBet)
         player.currentBet = 0
@@ -120,10 +112,8 @@ currentGameRound.players.forEach(player => {
         player.bank = player.bank + 2*(player.currentBet)
         player.currentBet = 0
     }
-   
-
-
 })
+      
 //sendUpdatedGameStateToClients()
 setTimeout(function() {
     let refreshedPlayersArray = []
@@ -134,17 +124,12 @@ setTimeout(function() {
     console.log('currentPlayers', currentGameRound.players)
     sendUpdatedGameStateToClients()
   }, 3000);
-
-
     }
-    
-    
     sendUpdatedGameStateToClients()
 }
 
 
 function sendUpdatedGameStateToClients(){
-
     let gameState = {
         players: currentGameRound.players,
         dealer: currentGameRound.dealer
@@ -156,14 +141,11 @@ function sendUpdatedGameStateToClients(){
 
 //Websocket that fires on connection
 io.on('connection', function(socket){
-
     socket.on('joinGame', function(data){
-        console.log('Welcome!', socket.id
-        )
+        console.log('Welcome!', socket.id)
         let currentPlayer = currentGameRound.players.find(({id}) => id === socket.id)
         //If there is no current player with the ID of the one connecting...
         if (!currentPlayer) {
-    
             //Creates new player, using their socket ID as their name
             currentPlayer = new cardsLogic.player(socket.id, data.username, 1000)
     
@@ -174,7 +156,7 @@ io.on('connection', function(socket){
             //Pushes new player into the players array
             currentGameRound.players.push(currentPlayer)
     
-           sendUpdatedGameStateToClients()
+            sendUpdatedGameStateToClients()
         }
     })
 
@@ -182,8 +164,9 @@ io.on('connection', function(socket){
     socket.on('disconnect', function(data){
         let currentPlayer = currentGameRound.players.find(({id}) => id === socket.id)
         if(typeof currentPlayer !== 'undefined' ){
-        currentGameRound.players = currentGameRound.players.filter(player => player.id !== currentPlayer.id)
-        sendUpdatedGameStateToClients()}
+          currentGameRound.players = currentGameRound.players.filter(player => player.id !== currentPlayer.id)
+          sendUpdatedGameStateToClients()
+        }
     })
     
     //Listens for a card draw request from client
@@ -219,10 +202,6 @@ io.on('connection', function(socket){
         runDealer()
     })
 
-    //test
-
-
-
     
 //test
     socket.on('bet', function(data){
@@ -230,8 +209,6 @@ io.on('connection', function(socket){
         currentPlayer.bet(parseInt(data))
        //sendUpdatedGameStateToClients()
         console.log(currentPlayer)
-    
-  
     })
 
     socket.on('loadUserBank', function(data){
